@@ -6,7 +6,8 @@ import argparse
 import configparser
 import time
 import sys
-from pyzabbix import ZabbixAPI
+import ssl
+from zabbix_utils import ZabbixAPI
 
 def main():
     """Main function"""
@@ -18,6 +19,8 @@ def main():
     parser.add_argument('--user', help='Zabbix user')
     parser.add_argument('--password', help='Zabbix password')
     parser.add_argument('--instance', help='X-Road instance filter')
+    parser.add_argument('--validate-certs', action="store_true", help='X-Road instance filter')
+    parser.add_argument('--ca-path', help='Zabbix server CA path')
     parser.add_argument(
         '-s', help='Output only percentage of hosts that were not updated in the last S seconds',
         type=int)
@@ -27,6 +30,8 @@ def main():
     user = ''
     password = ''
     instance = ''
+    validate_certs = False
+    ca_path = ''
     if args.config:
         config = configparser.RawConfigParser()
         config.read(args.config)
@@ -39,6 +44,10 @@ def main():
             password = config.get('zabbix', 'password')
         if 'instance' in conf_items:
             instance = config.get('zabbix', 'instance')
+        if 'validate_certs' in conf_items:
+            validate_certs = config.getboolean('zabbix', 'validate_certs')
+        if 'ca_path' in conf_items:
+            ca_path = config.get('zabbix', 'ca_path')
     if args.url:
         url = args.url
     if args.user:
@@ -47,12 +56,19 @@ def main():
         password = args.password
     if args.instance:
         instance = args.instance
+    if args.validate_certs:
+        validate_certs = args.validate_certs
+    if args.ca_path:
+        ca_path = args.ca_path
 
     if not url or not user or not password:
         sys.stderr.write('ERROR: Zabbix configuration missing.\n')
         sys.exit(1)
 
-    zapi = ZabbixAPI(url=url, user=user, password=password)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    if ca_path:
+        ctx.load_verify_locations(ca_path)
+    zapi = ZabbixAPI(url=url, user=user, password=password, validate_certs=validate_certs, ssl_context=ctx)
 
     hosts = None
     if instance:

@@ -3,3 +3,5 @@ url = https://myzabbix.server/
 user = ZABBIX_USER
 password = ZABBIX_PASS
 instance = INST
+validate_certs = true
+ca_path = certs/ca.pem

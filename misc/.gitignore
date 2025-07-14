@@ -6,5 +6,8 @@ __pycache__/
 # Configuration files contain secrets
 *.cfg
 
+# For TLS testing
+certs/
+
 .idea/
 venv*/

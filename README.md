@@ -96,7 +96,7 @@ installation guide! You need to use **"character set utf8mb4 collate utf8mb4_bin
 creation parameters because service names and versions are case-sensitive
 in X-Road and "service.v1" is not equal to "Service.V1".
 
-**NB! Tested with Zabbix 6.0 LTS.**
+**NB! Tested with Zabbix 7.0 LTS.**
 
 [zabbix_cron.sh](zabbix/zabbix_cron.sh) - Sample shell script that can
 be executed from crontab to periodically collect the data.
@@ -111,10 +111,10 @@ Environment monitoring is using Zabbix template
 [envmon_template.xml](zabbix/envmon_template.xml) that should be
 imported into Zabbix prior to execution of the collector.
 
-Collector requires [py-zabbix](https://github.com/adubkov/py-zabbix) package
+Collector requires [zabbix_utils](https://github.com/zabbix/python-zabbix-utils) package
 which can be installed with:
 ```
-sudo pip install py-zabbix
+sudo pip install zabbix_utils
 ```
 
 ## Miscellaneous

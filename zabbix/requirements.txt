@@ -1,2 +1,2 @@
-py-zabbix
+zabbix_utils
 requests

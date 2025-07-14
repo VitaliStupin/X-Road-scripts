@@ -1,1589 +1,807 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>3.0</version>
-    <date>2018-03-14T08:31:37Z</date>
-    <groups>
-        <group>
+    <version>7.0</version>
+    <template_groups>
+        <template_group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
             <name>Templates</name>
-        </group>
-    </groups>
+        </template_group>
+    </template_groups>
     <templates>
         <template>
+            <uuid>d151e3d4b29a489c919f6a15d345a274</uuid>
             <template>X-Road Environmental monitoring</template>
             <name>X-Road Environmental monitoring</name>
-            <description/>
             <groups>
                 <group>
                     <name>Templates</name>
                 </group>
             </groups>
-            <applications/>
             <items>
                 <item>
+                    <uuid>b7d06777bc484c55bf33aa03189f34aa</uuid>
+                    <name>4_CountOfCerts&lt;30</name>
+                    <type>DEPENDENT</type>
+                    <key>certCount</key>
+                    <delay>0</delay>
+                    <history>90d</history>
+                    <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>try {
+  serdid = value.split(&quot;\n&quot;);
+  aeguvad_serdid = [];
+counter = 0
+  for (var i=0; i &lt; serdid.length; i+=6){
+    if (!serdid[i]) {
+      continue
+    }
+    var cert = {}
+    cert = {
+      sha1Hash: serdid[i].match(/[:\w]{59}/)[0],
+      notBefore: new Date(serdid[i+1].match(/....-..-../)[0]),
+      notAfter: new Date(serdid[i+2].match(/....-..-../)[0]),
+      certificateType: serdid[i+3].match(/\w+$/)[0],
+      active: serdid[i+4].match(/\w+$/)[0]
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    // Calculating the time difference between two dates
+    const diffInTime = cert.notAfter.getTime() - Date.now();
+
+    // Calculating the no. of days between two dates
+    const diffInDays = Math.round(diffInTime / oneDay);
+    cert.daysToExp = diffInDays;
+    dayOfExp = cert.notAfter.getDate() + '.' + (Number(cert.notAfter.getMonth()) + 1) +'.'+ cert.notAfter.getFullYear()
+// &lt;td&gt; ' + cert.certificateType + '&lt;/td&gt; &lt;th&gt;Tüüp&lt;/th&gt;
+    if (cert.certificateType == 'INTERNAL_IS_CLIENT_TLS'){
+      continue
+    }
+    else if (diffInDays &lt; 31 &amp;&amp; 0 &lt; diffInDays) {
+          counter++
+
+    } else {continue}
+   }
+   return counter;
+
+} catch (error) {
+  return &quot;Viga: &quot; + error;
+}</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>Certificates</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <uuid>5c852211a1c24ff6957688ad77ed3af8</uuid>
+                            <expression>last(/X-Road Environmental monitoring/certCount)&lt;&gt;0</expression>
+                            <name>Less_than_30_days_cert_count</name>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>5f290c32a3b1454c831d4c79ae8df0bc</uuid>
                     <name>Certificates</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>Certificates</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>8659d45a76dd41059733f6be7fea5781</uuid>
                     <name>Certificates_validity</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>Certificates_validity</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
                     <units>s</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>c7693642e10c46bab0ba8e6d7757d4b4</uuid>
                     <name>CommittedVirtualMemory_max</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>CommittedVirtualMemory_max</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>f26135e40e9f498c9a521bf628b25942</uuid>
                     <name>CommittedVirtualMemory_mean</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>CommittedVirtualMemory_mean</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>b9664361b35d48b291824bf5cb3b8b5b</uuid>
                     <name>CommittedVirtualMemory_median</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>CommittedVirtualMemory_median</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>521c046e7ffb416e8b186c6c5207b704</uuid>
                     <name>CommittedVirtualMemory_min</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>CommittedVirtualMemory_min</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>884c405256b04f1c97ee10974aee4e29</uuid>
                     <name>CommittedVirtualMemory_stddev</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>CommittedVirtualMemory_stddev</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>085ea05b99064e9ea5c0586bb6d9243f</uuid>
                     <name>CommittedVirtualMemory_updated</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>CommittedVirtualMemory_updated</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>9c7a92c315b04f70999bbcc54769587f</uuid>
                     <name>DiskSpaceFree_</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>DiskSpaceFree_</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>50ea8c21520f4649ba8c496d1d487a3b</uuid>
                     <name>DiskSpaceTotal_</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>DiskSpaceTotal_</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>725e44c2652741feb95f0f60df1dcacf</uuid>
+                    <name>5_Expiration</name>
+                    <type>DEPENDENT</type>
+                    <key>ExpirationDate</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>try {
+  serdid = value.split(&quot;\n&quot;);
+  aeguvad_serdid = &quot;&quot;;
+  saada = false;
+  for (var i=0; i &lt; serdid.length; i+=6){
+    if (!serdid[i]) {
+      continue
+    }
+    var cert = {}
+    cert = {
+      sha1Hash: serdid[i].match(/[:\w]{59}/)[0],
+      notBefore: new Date(serdid[i+1].match(/....-..-../)[0]),
+      notAfter: new Date(serdid[i+2].match(/....-..-../)[0]),
+      certificateType: serdid[i+3].match(/\w+$/)[0],
+      active: serdid[i+4].match(/\w+$/)[0]
+    }
+    const oneDay = 1000 * 60 * 60 * 24;
+    // Calculating the time difference between two dates
+    const diffInTime = cert.notAfter.getTime() - Date.now();
+
+    // Calculating the no. of days between two dates
+    const diffInDays = Math.round(diffInTime / oneDay);
+    cert.daysToExp = diffInDays;
+    dayOfExp = cert.notAfter.getDate() + '.' + (Number(cert.notAfter.getMonth()) + 1) +'.'+ cert.notAfter.getFullYear()
+// &lt;td&gt; ' + cert.certificateType + '&lt;/td&gt; &lt;th&gt;Tüüp&lt;/th&gt;
+    if (cert.certificateType == 'INTERNAL_IS_CLIENT_TLS'){
+      continue
+}
+    else if (diffInDays &lt; 31 &amp;&amp; 0 &lt; diffInDays) {
+      if (diffInDays == 7 || diffInDays == 30) {
+           aeguvad_serdid += '&lt;tr&gt;&lt;td&gt;&lt;b&gt;' + cert.daysToExp + '&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;' +  dayOfExp + '&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;' + cert.sha1Hash + '&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt; ' + cert.active + '&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;';
+           saada = true;
+       } else {
+          aeguvad_serdid += '&lt;tr&gt;&lt;td&gt;' + cert.daysToExp + '&lt;/td&gt;&lt;td&gt;' +  dayOfExp + '&lt;/td&gt;&lt;td&gt;' + cert.sha1Hash + '&lt;/td&gt;&lt;td&gt; ' + cert.active + '&lt;/td&gt;&lt;/tr&gt;';
+       }
+} else {
+     continue
+}
+}
+
+    if (aeguvad_serdid == &quot;&quot;) {
+      return aeguvad_serdid = &quot;OK&quot;;
+    }
+    else if (saada){
+      var style = '&lt;style&gt;table{border-collapse:collapse;}th, td{border: 1px solid black;padding: 1px;}&lt;/style&gt;'
+      var header =  style + '&lt;tr&gt;&lt;th&gt;Päevi aegumiseni&lt;/th&gt;&lt;th&gt;Aegumise kp&lt;/th&gt;&lt;th&gt;sha1Hash&lt;/th&gt;&lt;th&gt;Aktiivne&lt;/th&gt;&lt;/tr&gt;';
+      aeguvad_serdid =  '&lt;table style={border-collapse: collapse;border: 1px solid black;}&gt;' + header + aeguvad_serdid + '&lt;/table&gt;';
+    } else {
+return aeguvad_serdid = &quot;OK&quot;;
+}
+
+  return aeguvad_serdid;
+} catch (error) {
+  return &quot;Viga: &quot; + error;
+}</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>Certificates</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <uuid>c7ec88c8e7f645df81347eca096e1923</uuid>
+                            <expression>last(/X-Road Environmental monitoring/ExpirationDate)&lt;&gt;&quot;OK&quot;</expression>
+                            <name>ExpirationTrigger</name>
+                            <priority>DISASTER</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>671a9ea88a5d44aa9de7320409523d46</uuid>
+                    <name>2_proxy_vs</name>
+                    <type>DEPENDENT</type>
+                    <key>forwardproxyversion</key>
+                    <delay>0</delay>
+                    <history>90d</history>
+                    <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <master_item>
+                        <key>proxyVersion</key>
+                    </master_item>
+                </item>
+                <item>
+                    <uuid>7aaf0af641364eb388e92448bfde51d4</uuid>
                     <name>FreePhysicalMemory_max</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreePhysicalMemory_max</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>22b19875e2f147d5a5a495baebff8f05</uuid>
                     <name>FreePhysicalMemory_mean</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreePhysicalMemory_mean</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>9379b8fb2b5a4e4d9be5d6d7c525ae82</uuid>
                     <name>FreePhysicalMemory_median</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreePhysicalMemory_median</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>83b049ca813345bf8ec8da4e01a1d3fe</uuid>
                     <name>FreePhysicalMemory_min</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreePhysicalMemory_min</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>2f46004b8fa845ae831d650ffe0a5860</uuid>
                     <name>FreePhysicalMemory_stddev</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreePhysicalMemory_stddev</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>16448538695944f9a1e44742ff08501c</uuid>
                     <name>FreePhysicalMemory_updated</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreePhysicalMemory_updated</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>013c4f67bc994c8687861c5b6e99d0a1</uuid>
                     <name>FreeSwapSpace_max</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreeSwapSpace_max</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>a221cff3e5c842bbbfa0808e4ea534d9</uuid>
                     <name>FreeSwapSpace_mean</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreeSwapSpace_mean</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>c15ae28b6bab4247949abbc6d1ed38bd</uuid>
                     <name>FreeSwapSpace_median</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreeSwapSpace_median</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>8a63e712cc8d45988b5ccd47da6d0433</uuid>
                     <name>FreeSwapSpace_min</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreeSwapSpace_min</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>359c90a41fc8424bad68795727f5761c</uuid>
                     <name>FreeSwapSpace_stddev</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreeSwapSpace_stddev</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>75ddcac956274043b048f2513124c8d2</uuid>
                     <name>FreeSwapSpace_updated</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>FreeSwapSpace_updated</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>4529f11ce788491caa5d5419698b6f28</uuid>
                     <name>MaxFileDescriptorCount</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>MaxFileDescriptorCount</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>08f8a79bd047407eb50ee8ce635d03d4</uuid>
+                    <name>1_OS</name>
+                    <type>DEPENDENT</type>
+                    <key>newOS</key>
+                    <delay>0</delay>
+                    <history>90d</history>
+                    <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>if (value.includes(&quot;4.15.0&quot;)){
+ value = &quot;Ubuntu 18 (Bionic)&quot;
+}
+else if (value.includes(&quot;5.4.0&quot;)){
+value= &quot;Ubuntu 20 (Focal)&quot;
+}
+else if (value.includes(&quot;5.15.0&quot;)){
+value= &quot;Ubuntu 22 (Jammy)&quot;
+}
+else if (value.includes(&quot;3.10.0&quot;)){
+value= &quot;RHEL7&quot;
+}
+else if (value.includes(&quot;5.10.192&quot;)){
+value= &quot;Amazon Linux&quot;
+}
+else if (value.includes(&quot;5.14.0-162.18.1.el9_1.x86_64&quot;)){
+value= &quot;Oracle Linux 9&quot;
+}
+else if (value.includes(&quot;6.2.0-1009-aws&quot;)){
+value= &quot;Ubuntu 22 (AWS)&quot;
+}
+else if (value.includes(&quot;5.14.0-284&quot;)){
+value= &quot;Rocky Linux 9&quot;
+}
+else if (value.includes(&quot;3.13.0-170&quot;)){
+value= &quot;Ubuntu 14 (Trusty)&quot;
+}
+else if (value.includes(&quot;6.2.0-1015-aws&quot;)){
+value= &quot;Ubuntu 22 (AWS)&quot;
+}
+else {
+value = &quot;Täienda scripti&quot; + value
+}
+return value</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>OperatingSystem</key>
+                    </master_item>
+                </item>
+                <item>
+                    <uuid>242397154a8248c698495997efc3a108</uuid>
                     <name>OpenFileDescriptorCount_max</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OpenFileDescriptorCount_max</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>a4ef1537d0204f4a9d5ea108f8d0f930</uuid>
                     <name>OpenFileDescriptorCount_mean</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OpenFileDescriptorCount_mean</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>43c14c86a65f4e659df428297d26d1d0</uuid>
                     <name>OpenFileDescriptorCount_median</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OpenFileDescriptorCount_median</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>885b440f9dd74b4eac9624285d4ceecd</uuid>
                     <name>OpenFileDescriptorCount_min</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OpenFileDescriptorCount_min</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>f7cc8edfd1f440d2ba98b589ace2dcc0</uuid>
                     <name>OpenFileDescriptorCount_stddev</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OpenFileDescriptorCount_stddev</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>25e2903beb664f6f96e3bc873d09bcf5</uuid>
                     <name>OpenFileDescriptorCount_updated</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OpenFileDescriptorCount_updated</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>1e56df667eb54d9e98317be6271ec71b</uuid>
                     <name>OperatingSystem</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>OperatingSystem</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>d7304c604e6841998af5fa1b17cbabca</uuid>
                     <name>Packages</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>Packages</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>3f0c5f86cbc647de8ea28546cde823b6</uuid>
                     <name>proxyVersion</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>proxyVersion</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>b6e80e54b99c48e291d439ac058abff9</uuid>
+                    <name>3_proxy_vs_ctrl</name>
+                    <type>DEPENDENT</type>
+                    <key>proxyversioncontrol</key>
+                    <delay>0</delay>
+                    <history>90d</history>
+                    <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>if (value[0] == '6'){return 'CRITICAL'}
+else if (value[2] == '0' || value[2] == '1'){return 'NOT OK'}
+else if (value[2] == '2'){return 'ON THE EDGE'}
+else {return 'OK'}</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>proxyVersion</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <uuid>5ebcebe0e6ab4bb6961b26b8927f4082</uuid>
+                            <expression>last(/X-Road Environmental monitoring/proxyversioncontrol)=&quot;CRITICAL&quot;</expression>
+                            <name>ProxyVersion</name>
+                            <priority>DISASTER</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>8b1073f1b22047c7a7ce4ae95be73796</uuid>
+                            <expression>last(/X-Road Environmental monitoring/proxyversioncontrol)=&quot;NOT OK&quot;</expression>
+                            <name>ProxyVersion</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>8b9131a6fc204e8288d09454c4ec67db</uuid>
+                            <expression>last(/X-Road Environmental monitoring/proxyversioncontrol)=&quot;ON THE EDGE&quot;</expression>
+                            <name>ProxyVersion</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>8e0d3ff8bb554af58f9a2d4c42b4a339</uuid>
+                    <name>x</name>
+                    <type>DEPENDENT</type>
+                    <key>send_proxy_alarm</key>
+                    <delay>0</delay>
+                    <history>90d</history>
+                    <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>if (value[0] == '6'){return value}
+else if (value[2] == '0' || value[2] == '1'){return value}
+else if (value[2] == '2'){return 'OK'}
+else {return 'OK'}</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>proxyVersion</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <uuid>5c56110409904f0c9f5b5027510592f4</uuid>
+                            <expression>last(/X-Road Environmental monitoring/send_proxy_alarm)&lt;&gt;&quot;OK&quot;</expression>
+                            <name>send_proxy_version_alarm</name>
+                            <status>DISABLED</status>
+                            <priority>HIGH</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>4b68bbde4f284f9b8a358b4e581efda5</uuid>
                     <name>SystemCpuLoad_max</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>SystemCpuLoad_max</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>4b9e62ffb76442a4a260bc044e039796</uuid>
                     <name>SystemCpuLoad_mean</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>SystemCpuLoad_mean</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>390005ba4ea1454e9b798b2883ad9bb3</uuid>
                     <name>SystemCpuLoad_median</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>SystemCpuLoad_median</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>ce75ebbf62c44254a13b0fb29b8f21ff</uuid>
                     <name>SystemCpuLoad_min</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>SystemCpuLoad_min</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>77b03e9b20fe4d05b4129f2d422f3b84</uuid>
                     <name>SystemCpuLoad_stddev</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>SystemCpuLoad_stddev</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                 </item>
                 <item>
+                    <uuid>de02882306524c50ba24a10159b638cb</uuid>
                     <name>SystemCpuLoad_updated</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>SystemCpuLoad_updated</key>
                     <delay>0</delay>
-                    <history>7</history>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
-                    <status>0</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>b92c635c76cf499c901f46c2e87102bc</uuid>
                     <name>TotalPhysicalMemory</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>TotalPhysicalMemory</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
                 <item>
+                    <uuid>844a467c13964c4dbf4693feeaf83f75</uuid>
                     <name>TotalSwapSpace</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>TRAP</type>
                     <key>TotalSwapSpace</key>
                     <delay>0</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
                     <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications/>
-                    <valuemap/>
-                    <logtimefmt/>
                 </item>
             </items>
-            <discovery_rules/>
-            <macros/>
-            <templates/>
-            <screens/>
+            <macros>
+                <macro>
+                    <macro>{$CLIENT}</macro>
+                    <value>{HOST.NAME}</value>
+                    <description>Asutuse registrikood</description>
+                </macro>
+            </macros>
+            <dashboards>
+                <dashboard>
+                    <uuid>25520be1808843fdbba27313268388df</uuid>
+                    <name>Host</name>
+                    <pages>
+                        <page>
+                            <widgets>
+                                <widget>
+                                    <type>itemhistory</type>
+                                    <width>69</width>
+                                    <height>10</height>
+                                    <fields>
+                                        <field>
+                                            <type>ITEM</type>
+                                            <name>columns.0.itemid</name>
+                                            <value>
+                                                <host>X-Road Environmental monitoring</host>
+                                                <key>OperatingSystem</key>
+                                            </value>
+                                        </field>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>columns.0.monospace_font</name>
+                                            <value>1</value>
+                                        </field>
+                                        <field>
+                                            <type>STRING</type>
+                                            <name>columns.0.name</name>
+                                            <value>OperatingSystem</value>
+                                        </field>
+                                        <field>
+                                            <type>ITEM</type>
+                                            <name>columns.1.itemid</name>
+                                            <value>
+                                                <host>X-Road Environmental monitoring</host>
+                                                <key>Packages</key>
+                                            </value>
+                                        </field>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>columns.1.monospace_font</name>
+                                            <value>1</value>
+                                        </field>
+                                        <field>
+                                            <type>STRING</type>
+                                            <name>columns.1.name</name>
+                                            <value>Packages</value>
+                                        </field>
+                                        <field>
+                                            <type>ITEM</type>
+                                            <name>columns.2.itemid</name>
+                                            <value>
+                                                <host>X-Road Environmental monitoring</host>
+                                                <key>proxyVersion</key>
+                                            </value>
+                                        </field>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>columns.2.monospace_font</name>
+                                            <value>1</value>
+                                        </field>
+                                        <field>
+                                            <type>STRING</type>
+                                            <name>columns.2.name</name>
+                                            <value>proxyVersion</value>
+                                        </field>
+                                        <field>
+                                            <type>STRING</type>
+                                            <name>reference</name>
+                                            <value>AACBV</value>
+                                        </field>
+                                        <field>
+                                            <type>INTEGER</type>
+                                            <name>show_timestamp</name>
+                                            <value>1</value>
+                                        </field>
+                                        <field>
+                                            <type>STRING</type>
+                                            <name>time_period.from</name>
+                                            <value>now-1y</value>
+                                        </field>
+                                        <field>
+                                            <type>STRING</type>
+                                            <name>time_period.to</name>
+                                            <value>now</value>
+                                        </field>
+                                    </fields>
+                                </widget>
+                            </widgets>
+                        </page>
+                    </pages>
+                </dashboard>
+            </dashboards>
         </template>
     </templates>
 </zabbix_export>

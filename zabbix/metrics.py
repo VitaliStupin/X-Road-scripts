@@ -2,7 +2,7 @@
 
 """X-Road Health and Environment monitoring collector for Zabbix."""
 
-# pip install py-zabbix requests
+# pip install zabbix_utils requests
 import argparse
 import calendar
 import configparser
@@ -16,7 +16,8 @@ import uuid
 from urllib.parse import urlsplit, unquote
 from xml.etree import ElementTree
 import requests
-from pyzabbix import ZabbixMetric, ZabbixSender, ZabbixAPI
+import ssl
+from zabbix_utils import ItemValue, Sender, ZabbixAPI
 
 # Dict containing default configuration
 DEFAULT_PARAMS = {
@@ -24,13 +25,15 @@ DEFAULT_PARAMS = {
     'envmon': False,
     # Debug levels:
     # 0 = Errors only; 1 = Simple debug; 2 = Detailed debug;
-    # 3 = Debug py-zabbix (use with thread_count=1).
+    # 3 = Debug zabbix_utils (use with thread_count=1).
     'debug': 2,
     # Zabbix configuration
     'zabbix_url': 'http://localhost/',
     'zabbix_sender_port': 10051,
     'zabbix_user': 'zabbix_user',
     'zabbix_pass': 'zabbix_pass',
+    'zabbix_validate_certs': False,
+    'zabbix_ca': '',
     'zabbix_group_id': '2',  # "Linux servers"
     'zabbix_trapper_type': '2',  # "Zabbix trapper"
     # EnvMon template configuration
@@ -86,9 +89,9 @@ SERVER_HEALTH_ITEMS = [
 
 # Definitions of Service Items
 SERVICE_HEALTH_ITEMS = [
-    {'key': 'successfulRequestCount', 'type': '3', 'units': None, 'history': '7',
+    {'key': 'successfulRequestCount', 'type': '3', 'units': '', 'history': '7',
      'description': 'The number of successful requests occurred during the last period.'},
-    {'key': 'unsuccessfulRequestCount', 'type': '3', 'units': None, 'history': '7',
+    {'key': 'unsuccessfulRequestCount', 'type': '3', 'units': '', 'history': '7',
      'description': 'The number of unsuccessful requests occurred during the last period.'},
     {'key': 'requestMinDuration', 'type': '3', 'units': 'ms', 'history': '7',
      'description': 'The minimum duration of the request in milliseconds.'},
@@ -346,6 +349,10 @@ def load_conf(conf_arg):
             params['zabbix_user'] = config.get(CONF_SECTION, 'zabbix_user')
         if 'zabbix_pass' in conf_items:
             params['zabbix_pass'] = config.get(CONF_SECTION, 'zabbix_pass')
+        if 'zabbix_validate_certs' in conf_items:
+            params['zabbix_validate_certs'] = config.getboolean(CONF_SECTION, 'zabbix_validate_certs')
+        if 'zabbix_ca' in conf_items:
+            params['zabbix_ca'] = config.get(CONF_SECTION, 'zabbix_ca')
         if 'zabbix_group_id' in conf_items:
             params['zabbix_group_id'] = config.get(CONF_SECTION, 'zabbix_group_id')
         if 'zabbix_trapper_type' in conf_items:
@@ -575,7 +582,7 @@ def get_service_name(service):
 
 
 def get_metric(params, node, server):
-    """Convert XML metric to ZabbixMetric.
+    """Convert XML metric to ItemValue.
        Return Zabbix packet elements.
     """
     if params is None or node is None or server is None:
@@ -590,7 +597,7 @@ def get_metric(params, node, server):
             # Some names may have '/' character which is forbidden by
             # Zabbix
             name = name.replace('/', '')
-            res.append(ZabbixMetric(server, name, node.find('./m:value', NS).text))
+            res.append(ItemValue(server, name, node.find('./m:value', NS).text))
             return res
         except AttributeError:
             if params['debug'] > 1:
@@ -599,12 +606,12 @@ def get_metric(params, node, server):
     elif node.tag == nsp + 'histogramMetric':
         try:
             name = node.find('./m:name', NS).text
-            res.append(ZabbixMetric(server, name + '_updated', node.find('./m:updated', NS).text))
-            res.append(ZabbixMetric(server, name + '_min', node.find('./m:min', NS).text))
-            res.append(ZabbixMetric(server, name + '_max', node.find('./m:max', NS).text))
-            res.append(ZabbixMetric(server, name + '_mean', node.find('./m:mean', NS).text))
-            res.append(ZabbixMetric(server, name + '_median', node.find('./m:median', NS).text))
-            res.append(ZabbixMetric(server, name + '_stddev', node.find('./m:stddev', NS).text))
+            res.append(ItemValue(server, name + '_updated', node.find('./m:updated', NS).text))
+            res.append(ItemValue(server, name + '_min', node.find('./m:min', NS).text))
+            res.append(ItemValue(server, name + '_max', node.find('./m:max', NS).text))
+            res.append(ItemValue(server, name + '_mean', node.find('./m:mean', NS).text))
+            res.append(ItemValue(server, name + '_median', node.find('./m:median', NS).text))
+            res.append(ItemValue(server, name + '_stddev', node.find('./m:stddev', NS).text))
             return res
         except AttributeError:
             if params['debug'] > 1:
@@ -615,7 +622,7 @@ def get_metric(params, node, server):
 
 
 def get_x_road_packages(params, node, server):
-    """Convert XML Packages metric to ZabbixMetric (includes only X-Road
+    """Convert XML Packages metric to ItemValue (includes only X-Road
     packages)
     Return Zabbix packet elements.
     """
@@ -631,7 +638,7 @@ def get_x_road_packages(params, node, server):
             package_name = pack.find('./m:name', NS).text
             if 'xroad' in package_name or 'xtee' in package_name:
                 data += f"{package_name}: {pack.find('./m:value', NS).text}\n"
-        res.append(ZabbixMetric(server, name, data))
+        res.append(ItemValue(server, name, data))
         return res
     except AttributeError:
         if params['debug'] > 1:
@@ -640,7 +647,7 @@ def get_x_road_packages(params, node, server):
 
 
 def get_certificates(params, node, server):
-    """Convert XML Certificates metric to ZabbixMetric
+    """Convert XML Certificates metric to ItemValue
     Return Zabbix packet elements.
     """
     if params is None or node is None or server is None:
@@ -677,15 +684,15 @@ def get_certificates(params, node, server):
                 min_not_after = not_after_time
 
         # Adding Certificates metric
-        res.append(ZabbixMetric(server, name, data))
+        res.append(ItemValue(server, name, data))
 
         # Adding Certificates_validity metric
         current_time = time.gmtime()
         if current_time < max_not_before or current_time > min_not_after:
             # Some certificate is not yet valid or already expired
-            res.append(ZabbixMetric(server, name + '_validity', '0'))
+            res.append(ItemValue(server, name + '_validity', '0'))
         else:
-            res.append(ZabbixMetric(server, name + '_validity', str(
+            res.append(ItemValue(server, name + '_validity', str(
                 calendar.timegm(min_not_after) - calendar.timegm(current_time))))
         return res
     except AttributeError:
@@ -845,7 +852,7 @@ def host_mon(shared_params, server_data):
             metric_path = f"./om:{item['key']}"
             metric_key = item['key']
             try:
-                packet.append(ZabbixMetric(host_name, metric_key, metrics.find(
+                packet.append(ItemValue(host_name, metric_key, metrics.find(
                     metric_path, NS).text))
             except AttributeError:
                 print_error(f"Metric '{metric_key}' for Host '{host_name}' is not available!")
@@ -866,7 +873,7 @@ def host_mon(shared_params, server_data):
                 metric_path = f".//om:{item['key']}"
                 metric_key = f"{service_key}[{item['key']}]"
                 try:
-                    packet.append(ZabbixMetric(host_name, metric_key, service_events.find(
+                    packet.append(ItemValue(host_name, metric_key, service_events.find(
                         metric_path, NS).text))
                 except AttributeError:
                     pass
@@ -882,8 +889,7 @@ def host_mon(shared_params, server_data):
         time.sleep(params['sleep_after_host_change'])
 
     # Pushing metrics to Zabbix
-    sender = ZabbixSender(zabbix_server=urlsplit(params['zabbix_url']).hostname,
-                          zabbix_port=params['zabbix_sender_port'])
+    sender = Sender(server=urlsplit(params['zabbix_url']).hostname, port=params['zabbix_sender_port'])
     try:
         if params['debug']:
             if params['envmon']:
@@ -942,13 +948,17 @@ def main():
 
     # Create ZabbixAPI class instance
     try:
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        if params['zabbix_ca']:
+            ctx.load_verify_locations(params['zabbix_ca'])
         params['zapi'] = ZabbixAPI(
-            url=params['zabbix_url'], user=params['zabbix_user'], password=params['zabbix_pass'])
+            url=params['zabbix_url'], user=params['zabbix_user'], password=params['zabbix_pass'],
+            validate_certs=params['zabbix_validate_certs'], ssl_context=ctx)
     except Exception as err:
         print_error(f"Cannot connect to Zabbix.\nURL: {params['zabbix_url']}\nDetail: {err}")
         sys.exit(1)
 
-    # Debug py-zabbix.
+    # Debug zabbix_utils.
     # NB! Not debuging initial connection to avoid passwords being
     # logged to stdout.
     if params['debug'] > 2:
